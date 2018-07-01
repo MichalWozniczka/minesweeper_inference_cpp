@@ -22,12 +22,10 @@ Sampler::Sampler(vector<vector<int> > g, vector<vector<bool> > f, vector<vector<
         }
         mines.at(pos.at(0)).at(pos.at(1)) = true;
     }
-    //qDebug() << mines;
     sparePos = {rand()%height, rand()%width};
     while(mines.at(sparePos.at(0)).at(sparePos.at(1)) || flipped.at(sparePos.at(0)).at(sparePos.at(1)) || flags.at(sparePos.at(0)).at(sparePos.at(1))) {
         sparePos = {rand()%height, rand()%width};
     }
-    //mines.at(sparePos.at(0)).at(sparePos.at(1)) = true;
 
     for(int i = 0; i < height; i++) {
         for(int j = 0; j < width; j++) {

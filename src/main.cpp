@@ -11,17 +11,13 @@ void comp_loop(Minesweeper *ms, Window *gui) {
 
     while(1) {
         while(!ms->finished()) {
-            //sleep(2);
             if(ms->actOnBeliefs()) {
                 ms->loss = true;
                 break;
             }
             ms->placeFlags();
-            sleep(0);
             ms->updateBeliefs();
-            sleep(0);
             gui->maxBeliefs = ms->normalizeBeliefs();
-            sleep(0);
             gui->finishedUpdate = false;
             gui->update();
             int blockCompiler = 0;
@@ -30,16 +26,9 @@ void comp_loop(Minesweeper *ms, Window *gui) {
 
         ms->normalizeBeliefs();
         gui->update();
-        //gui->show();
+        gui->show();
 
-        if(ms->loss) {
-            //gui.lossScreen(ms);
-        }
-        //gui.window.update();
-        //gui->update();
-        //gui->show();
-
-        cout << "A\n";
+        cout << "Press Enter to restart";
         getchar();
 
         ms->init();
@@ -59,7 +48,6 @@ int main(int argc, char **argv) {
     Minesweeper ms = Minesweeper(msWidth, msHeight, numMines/*, true, g*/);
     //ms.flipped.at(0).at(0) = true;
 
-    cout << "tyjyjdxjdy\n";
     int winWidth = 800;
     int winHeight = 800;
     QWidget widget;

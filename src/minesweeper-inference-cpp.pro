@@ -1,11 +1,12 @@
 TEMPLATE = app
-TARGET = name_of_the_app
+TARGET = MinesweeperInference
 
 QT = core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += console
+CONFIG += console \
+    static
 
 SOURCES += main.cpp minesweeper.cpp \
     window.cpp \

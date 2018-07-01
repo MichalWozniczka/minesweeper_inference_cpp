@@ -24,6 +24,7 @@ Minesweeper::Minesweeper(int w, int h, int n, bool givenGrid, vector<vector<int>
     }
 }
 
+//Resets minesweeper grid to default values
 void Minesweeper::init(bool givenGrid, vector<vector<int>> g) {
     beliefs = vector<vector<double>>(height, vector<double>(width, 1));
     flipped = vector<vector<bool>>(height, vector<bool>(width, false));
@@ -32,6 +33,7 @@ void Minesweeper::init(bool givenGrid, vector<vector<int>> g) {
         grid = g;
         return;
     }
+    loss = false;
     grid = vector<vector<int>>(height, vector<int>(width, 0));
 
     vector<int> pos;
@@ -61,9 +63,10 @@ void Minesweeper::init(bool givenGrid, vector<vector<int>> g) {
         }
     }
     originalGrid = grid;
-    qDebug() << grid;
 }
 
+//Flips the tile at the given coordinates and continues flipping all adjacent
+//tiles as long as their value is 0
 void Minesweeper::flip(int x, int y) {
     flipped.at(x).at(y) = true;
     pair<int, int> curpos(x, y);
@@ -95,28 +98,24 @@ void Minesweeper::flip(int x, int y) {
             }
         }
         i++;
-        cout << i << "\n";
     }
 }
 
+//Gets samples of random mine positions to see which positions are most likely
+//to contain mines, given the current uncovered tiles
 void Minesweeper::updateBeliefs() {
+    if(numFlags == numMines) {
+        return;
+    }
     beliefs = vector<vector<double>>(height, vector<double>(width, 0));
-    struct timespec tick, tock;
 
     int numSamples = 100000;
     vector<vector<vector<double>>> samples = vector<vector<vector<double>>>(height, vector<vector<double>>(width, vector<double>(numSamples, 0)));
-    clock_gettime(CLOCK_MONOTONIC, &tick);
 #pragma omp parallel for num_threads(8) schedule(dynamic, 1000)
     for(int a = 0; a < numSamples; a++) {
         Sampler sampler(grid, flipped, flags, numMines-numFlags);
         for(int i = 0; i < height; i++) {
             for(int j = 0; j < width; j++) {
-                //beliefs.at(i).at(j) += sampler.sample({i, j});
-                if(omp_get_thread_num() == 4 && i == 0 && j == 0) {
-                    //qDebug() << a;
-                }
-//#pragma omp critical
-//                beliefs.at(i).at(j) += sampler.sample({i, j});
                 samples.at(i).at(j).at(a) = sampler.sample({i, j});
             }
         }
@@ -128,11 +127,10 @@ void Minesweeper::updateBeliefs() {
             }
         }
     }
-    qDebug() << beliefs;
-    clock_gettime(CLOCK_MONOTONIC, &tock);
-    qDebug() << ((tock.tv_sec - tick.tv_sec) + (tock.tv_nsec - tick.tv_nsec) / 1000000000.0);
 }
 
+//Normalizes beliefs by making greatest belief equal to 1 with all other
+//beliefs being proportional
 double Minesweeper::normalizeBeliefs() {
     double maxBeliefs = 0;
     for(int i = 0; i < height; i++) {
@@ -154,6 +152,7 @@ double Minesweeper::normalizeBeliefs() {
     finishedNormalizing = true;
 }
 
+//Flip the tile that has the smallest probability of holding a mine
 bool Minesweeper::actOnBeliefs() {
     double minval = INT_MAX;
     vector<int> argmin = {0, 0};
@@ -171,6 +170,7 @@ bool Minesweeper::actOnBeliefs() {
     return grid.at(argmin.at(0)).at(argmin.at(1)) == -2;
 }
 
+//Place flags on all tiles that have 100% chance of having a mine
 void Minesweeper::placeFlags() {
     for(int i = 0; i < height; i++) {
         for(int j = 0; j < width; j++) {
@@ -206,16 +206,16 @@ void Minesweeper::placeFlags() {
             }
         }
     }
-    qDebug() << numMines-numFlags;
-    qDebug() << flags;
 }
 
+//Returns true if the game is over
 bool Minesweeper::finished() {
     int remainingCount = 0;
     int unflippedCount = 0;
+    int flagCount = 0;
     for(int i = 0; i < height; i++) {
         for(int j = 0; j < width; j++) {
-            if(beliefs.at(i).at(j) > 0) {
+            if(beliefs.at(i).at(j) > 0 && !flipped.at(i).at(j)) {
                 remainingCount++;
             }
             if(!flipped.at(i).at(j)) {
@@ -223,5 +223,5 @@ bool Minesweeper::finished() {
             }
         }
     }
-    return remainingCount == numMines == unflippedCount;
+    return (numFlags == numMines) && (numMines == unflippedCount);
 }
