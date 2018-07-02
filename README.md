@@ -1,10 +1,10 @@
-#About
+# About
 
-##About Minesweeper
+## About Minesweeper
 
 Minesweeper is a game about uncovering mines on a game board by using hints that are uncovered as the game is played. These hints come in the form of numbered tiles that tell you how many of the eight adjacent tiles contain mines. The game ends when all tiles are uncovered, except for the tiles covering mines.
 
-##About this app
+## About this app
 
 This application solves a game of minesweeper by uncovering tiles that are statistically least likely to contain a mine. This is done by finding the probability that a tile contains a mine (the darker a tile is, the greater the certainty that the tile contains a mine). The following formula is used:
 
@@ -36,18 +36,18 @@ which, for the "easy" difficulty in normal Minesweeper games (8x8 grid, 10 mines
 
 This app tries to remedy this by taking a sample of random mine positions instead of observing every possible mine position. Presumably, taking a large enough sample of possible mine positions allows for a precise enough calculation to approximate finding the exact probability. This application takes 100,000 samples per tile for an 8x8 grid with 10 mines.
 
-#Performance features
+# Performance features
 
 Since solving Minesweeper is very performance heavy, certain performance considerations needed to be made:
 
-##Sampling
+## Sampling
 
 Random samples of mine positions are taken instead of observing every possible mine position in order to approximate the probability that a tile contains a mine. Since the probabilities of each tile are independent of each other, one sample is made and reused once for every tile on the board. When a sample is made, (number of mines)-1 mines are randomly distributed across the game grid. When the sample is used, a mine is either placed in the position of the tile whose probability is being calculated (if there isn't already a mine there) or is placed somewhere on the board randomly (if there already is a mine there). Then, the sample is evaluated against all of the revealed evidence to determine whether the sample is valid; if it is, the count is incremented. After all samples are made and validated, the probability is estimated by dividing the count by the number of samples.
 
-##Multithreading
+## Multithreading
 
 Every sample is completely independent from every other sample, resource-wise. This means that each sample can be run on a different thread, with the only shared resource being the "valid" count for each tile. This application implements multithreading using omp pragmas on eight threads. The "valid" counts are kept on memory locations that are exclusive to each sample to mitigate true- and false-sharing in order to minimize bus traffic.
 
-#How to run
+# How to run
 
 The executable and all dependencies are located in win.7z. Run MinesweeperInference.exe to run the app.
