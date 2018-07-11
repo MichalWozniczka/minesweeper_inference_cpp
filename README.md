@@ -55,5 +55,7 @@ The executable and all dependencies are located in win.7z. Run MinesweeperInfere
 # Technologies
 
 Written in C++
+
 GUI created with QT
+
 Multithreading implemented with OMP
