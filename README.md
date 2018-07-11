@@ -51,3 +51,9 @@ Every sample is completely independent from every other sample, resource-wise. T
 # How to run
 
 The executable and all dependencies are located in win.7z. Run MinesweeperInference.exe to run the app.
+
+# Technologies
+
+Written in C++
+GUI created with QT
+Multithreading implemented with OMP
