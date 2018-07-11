@@ -34,7 +34,7 @@ However, this method becomes impossible for any decently sized Minesweeper game.
 
 which, for the "easy" difficulty in normal Minesweeper games (8x8 grid, 10 mines) is equal to 23,667,689,815 (23 trillion!!) observation, per tile! This makes finding the exact probability that a tile contains a mine basically impossible within a reasonable timeframe on a personal computer.
 
-This app tries to remedy this by taking a sample of random mine positions instead of observing every possible mine position. Presumably, taking a large enough sample of possible mine positions allows for a precise enough calculation to approximate finding the exact probability. This application takes 100,000 samples per tile for an 8x8 grid with 10 mines.
+This app tries to remedy this by taking a sample of random mine positions instead of observing every possible mine position. Presumably, taking a large enough sample of possible mine positions allows for a precise enough calculation to approximate finding the exact probability. This application repeatedly takes samples, normalizes them, and compares them to previous samples. If no tile's probability changed by more than 0.01, the beliefs are considered "converged" and are acted upon by choosing the tile with the lowest probability of holding a mine.
 
 # Performance features
 
@@ -42,7 +42,7 @@ Since solving Minesweeper is very performance heavy, certain performance conside
 
 ## Sampling
 
-Random samples of mine positions are taken instead of observing every possible mine position in order to approximate the probability that a tile contains a mine. Since the probabilities of each tile are independent of each other, one sample is made and reused once for every tile on the board. When a sample is made, (number of mines)-1 mines are randomly distributed across the game grid. When the sample is used, a mine is either placed in the position of the tile whose probability is being calculated (if there isn't already a mine there) or is placed somewhere on the board randomly (if there already is a mine there). Then, the sample is evaluated against all of the revealed evidence to determine whether the sample is valid; if it is, the count is incremented. After all samples are made and validated, the probability is estimated by dividing the count by the number of samples.
+Random samples of mine positions are taken instead of observing every possible mine position in order to approximate the probability that a tile contains a mine. Since the probabilities of each tile are independent of each other, one sample is made and reused once for every tile on the board. When a sample is made, (number of mines)-1 mines are randomly distributed across the game grid. When the sample is used, a mine is either placed in the position of the tile whose probability is being calculated (if there isn't already a mine there) or is placed somewhere on the board randomly (if there already is a mine there). Then, the sample is evaluated against all of the revealed evidence to determine whether the sample is valid; if it is, the count is incremented. After all samples are made and validated, the probability is estimated by dividing the count by the number of samples. Samples are taken until convergence, when the generated beliefs are then acted upon.
 
 ## Multithreading
 

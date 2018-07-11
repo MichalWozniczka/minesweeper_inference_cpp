@@ -108,25 +108,57 @@ void Minesweeper::updateBeliefs() {
         return;
     }
     beliefs = vector<vector<double>>(height, vector<double>(width, 0));
+    oldBeliefs = vector<vector<double>>(height, vector<double>(width, 0));
 
-    int numSamples = 100000;
+    int numSamples = 2400;
     vector<vector<vector<double>>> samples = vector<vector<vector<double>>>(height, vector<vector<double>>(width, vector<double>(numSamples, 0)));
-#pragma omp parallel for num_threads(8) schedule(dynamic, 1000)
-    for(int a = 0; a < numSamples; a++) {
-        Sampler sampler(grid, flipped, flags, numMines-numFlags);
-        for(int i = 0; i < height; i++) {
-            for(int j = 0; j < width; j++) {
-                samples.at(i).at(j).at(a) = sampler.sample({i, j});
+    do {
+#pragma omp parallel for num_threads(8) schedule(dynamic, 100)
+        for(int a = 0; a < numSamples; a++) {
+            Sampler sampler(grid, flipped, flags, numMines-numFlags);
+            for(int i = 0; i < height; i++) {
+                for(int j = 0; j < width; j++) {
+                    samples.at(i).at(j).at(a) = sampler.sample({i, j});
+                }
             }
         }
+      for(int i = 0; i < height; i++) {
+            for(int j = 0; j < width; j++) {
+                for(int a = 0; a < numSamples; a++) {
+                    beliefs.at(i).at(j) += samples.at(i).at(j).at(a);
+                }
+            }
+        }
+    } while(continueSampling());
+}
+
+bool Minesweeper::continueSampling() {
+    double maxBeliefs = 0;
+    double maxOldBeliefs = 0;
+    for(int i = 0; i < height; i++) {
+        for(int j = 0; j < width; j++) {
+            if(!flipped.at(i).at(j)) {
+                maxBeliefs = max(maxBeliefs, beliefs.at(i).at(j));
+                maxOldBeliefs = max(maxOldBeliefs, oldBeliefs.at(i).at(j));
+            }
+        }
+    }
+    if(maxBeliefs == maxOldBeliefs) {
+        oldBeliefs = beliefs;
+        return true;
     }
     for(int i = 0; i < height; i++) {
         for(int j = 0; j < width; j++) {
-            for(int a = 0; a < numSamples; a++) {
-                beliefs.at(i).at(j) += samples.at(i).at(j).at(a);
+            if(!flipped.at(i).at(j)) {
+                if(abs(beliefs.at(i).at(j)/(double)max(maxBeliefs, 1.0) - oldBeliefs.at(i).at(j)/(double)max(maxOldBeliefs, 1.0)) > 0.01) {
+                    oldBeliefs = beliefs;
+                    return true;
+                }
             }
         }
     }
+    oldBeliefs = beliefs;
+    return false;
 }
 
 //Normalizes beliefs by making greatest belief equal to 1 with all other
@@ -141,15 +173,6 @@ double Minesweeper::normalizeBeliefs() {
         }
     }
     return maxBeliefs;
-
-    for(int i = 0; i < height; i++) {
-        for(int j = 0; j < width; j++) {
-            if(!flipped.at(i).at(j)) {
-                beliefs.at(i).at(j) /= (double)max(maxBeliefs, 1.0);
-            }
-        }
-    }
-    finishedNormalizing = true;
 }
 
 //Flip the tile that has the smallest probability of holding a mine

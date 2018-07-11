@@ -22,6 +22,7 @@ public:
     vector<vector<int>> grid;
     vector<vector<int>> originalGrid;
     vector<vector<double>> beliefs;
+    vector<vector<double>> oldBeliefs;
     vector<vector<bool>> flipped;
     vector<vector<bool>> flags;
     bool finishedNormalizing;
@@ -33,6 +34,7 @@ public:
     void init(bool givenGrid = false, vector<vector<int>> g = vector<vector<int>>());
     void flip(int x, int y);
     void updateBeliefs();
+    bool continueSampling();
     double normalizeBeliefs();
     bool actOnBeliefs();
     void placeFlags();
