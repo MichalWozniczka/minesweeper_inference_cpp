@@ -8,29 +8,29 @@ Minesweeper is a game about uncovering mines on a game board by using hints that
 
 This application solves a game of minesweeper by uncovering tiles that are statistically least likely to contain a mine. This is done by finding the probability that a tile contains a mine (the darker a tile is, the greater the certainty that the tile contains a mine). The following formula is used:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=P(tile\&space;contains\&space;mine\&space;|\&space;all\&space;uncovered\&space;tiles)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?P(tile\&space;contains\&space;mine\&space;|\&space;all\&space;uncovered\&space;tiles)" title="P(tile contains mine | all uncovered tiles)" /></a>
+P(tile contains mine | all uncovered tiles)
 
 and uncovering the tile with the lowest probability. This probability can be derived using Bayes' theorem:
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=P(tile\&space;contains\&space;mine\&space;|\&space;all\&space;revealed\&space;tiles)\&space;=\&space;P(all\&space;revealed\&space;tiles\&space;|\&space;tile\&space;contains\&space;mine)\&space;\cdot\&space;P(tile\&space;contains\&space;mine)\&space;/\&space;P(all\&space;revealed\&space;tiles)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?P(tile\&space;contains\&space;mine\&space;|\&space;all\&space;revealed\&space;tiles)\&space;=\&space;P(all\&space;revealed\&space;tiles\&space;|\&space;tile\&space;contains\&space;mine)\&space;\cdot\&space;P(tile\&space;contains\&space;mine)\&space;/\&space;P(all\&space;revealed\&space;tiles)" title="P(tile contains mine | all revealed tiles) = P(all revealed tiles | tile contains mine) \cdot P(tile contains mine) / P(all revealed tiles)" /></a>
+P(tile contains mine | all uncovered tiles) = P(all revealed tiles | tile contains mine) * P(tile contains mine) / P(all revealed tiles)
 
 Or, more simply,
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=P(tile\&space;contains\&space;mine\&space;|\&space;all\&space;revealed\&space;tiles)\&space;\propto\&space;P(all\&space;revealed\&space;tiles\&space;|\&space;tile\&space;contains\&space;mine)\&space;\cdot\&space;P(tile\&space;contains\&space;mine)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?P(tile\&space;contains\&space;mine\&space;|\&space;all\&space;revealed\&space;tiles)\&space;\propto\&space;P(all\&space;revealed\&space;tiles\&space;|\&space;tile\&space;contains\&space;mine)\&space;\cdot\&space;P(tile\&space;contains\&space;mine)" title="P(tile contains mine | all revealed tiles) \propto P(all revealed tiles | tile contains mine) \cdot P(tile contains mine)" /></a>
+P(tile contains mine | all uncovered tiles) is proportionate to P(all revealed tiles | tile contains mine) * P(tile contains mine)
 
 And, since all tiles have an equal chance of containing a mine given no other information,
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=P(tile\&space;contains\&space;mine\&space;|\&space;all\&space;revealed\&space;tiles)\&space;\propto\&space;P(all\&space;revealed\&space;tiles\&space;|\&space;tile\&space;contains\&space;mine)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?P(tile\&space;contains\&space;mine\&space;|\&space;all\&space;revealed\&space;tiles)\&space;\propto\&space;P(all\&space;revealed\&space;tiles\&space;|\&space;tile\&space;contains\&space;mine)" title="P(tile contains mine | all revealed tiles) \propto P(all revealed tiles | tile contains mine)" /></a>
+P(tile contains mine | all uncovered tiles) is proportionate to P(all revealed tiles | tile contains mine)
 
 Therefore, the probability that a tile contains a mine given all of the revealed evidence is proportional to the probability that the revealed evidence is true given that the tile contains a mine. 
 
 The simplest way to use this to find the correct probability is to observe every possible permutation of the mines in which one of the mines are fixed to the tile for which the probability is being calculated, and count how many of those permutations are valid with respect to the uncovered evidence tiles. This count would then be divided by the total number of permutations observed.
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=P(all\&space;revealed\&space;tiles\&space;|\&space;this\&space;tile\&space;contains\&space;mine)&space;=&space;(count\&space;of\&space;valid\&space;mine\&space;placements\&space;with\&space;one\&space;mine\&space;fixed\&space;to\&space;this\&space;tile)\&space;/\&space;(count\&space;of\&space;all\&space;mine\&space;placements\&space;with\&space;one\&space;mine\&space;fixed\&space;to\&space;this\&space;tile)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?P(all\&space;revealed\&space;tiles\&space;|\&space;this\&space;tile\&space;contains\&space;mine)&space;=&space;(count\&space;of\&space;valid\&space;mine\&space;placements\&space;with\&space;one\&space;mine\&space;fixed\&space;to\&space;this\&space;tile)\&space;/\&space;(count\&space;of\&space;all\&space;mine\&space;placements\&space;with\&space;one\&space;mine\&space;fixed\&space;to\&space;this\&space;tile)" title="P(all\ revealed\ tiles\ |\ this\ tile\ contains\ mine) = (count\ of\ valid\ mine\ placements\ with\ one\ mine\ fixed\ to\ this\ tile)\ /\ (count\ of\ all\ mine\ placements\ with\ one\ mine\ fixed\ to\ this\ tile)" /></a>
+P(tile contains mine | all uncovered tiles) = (count of valid mine placements with one mine fixed to this tile) / (count of all mine placements with one mine fixed to this tile)
 
-However, this method becomes impossible for any decently sized Minesweeper game. The total number of mine placements that would have to be observed for each tile is
+However, this method becomes impossible for any decently sized Minesweeper game. The total number of mine placements that would have to be observed for each tile is 
 
-<a href="https://www.codecogs.com/eqnedit.php?latex=\binom{number\&space;of\&space;tiles\&space;-\&space;1}{number\&space;of\&space;mines\&space;-\&space;1}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\binom{number\&space;of\&space;tiles\&space;-\&space;1}{number\&space;of\&space;mines\&space;-\&space;1}" title="\binom{number\ of\ tiles\ -\ 1}{number\ of\ mines\ -\ 1}" /></a>
+(number of tiles)! / ((number of mines)! * (number of tiles - number of mines)!)
 
 which, for the "easy" difficulty in normal Minesweeper games (8x8 grid, 10 mines) is equal to 23,667,689,815 (23 trillion!!) observation, per tile! This makes finding the exact probability that a tile contains a mine basically impossible within a reasonable timeframe on a personal computer.
 
